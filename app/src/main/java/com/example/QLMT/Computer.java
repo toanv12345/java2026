@@ -9,20 +9,18 @@ package com.example.QLMT;
  * @author oocs
  */
 public class Computer {
-    private String id;          
-    private String name;        
+    private String id;               
     private String brand;    
-    private String specs;
+    private String cpu;
+    private int ram;
     private double price;
-    private boolean inStock;
 
-    public Computer(String id, String name, String brand, String specs, double price, boolean inStock) {
+    public Computer(String id, String brand, String cpu, int ram, double price) {
         this.id = id;
-        this.name = name;
         this.brand = brand;
-        this.specs = specs;
+        this.cpu = cpu;
+        this.ram = ram;
         this.price = price;
-        this.inStock= inStock;
     }
 
     public String getId() {
@@ -33,14 +31,6 @@ public class Computer {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getBrand() {
         return brand;
     }
@@ -49,12 +39,20 @@ public class Computer {
         this.brand = brand;
     }
 
-    public String getSpecs() {
-        return specs;
+    public String getCpu() {
+        return cpu;
     }
 
-    public void setSpecs(String specs) {
-        this.specs = specs;
+    public void setCpu(String cpu) {
+        this.cpu = cpu;
+    }
+
+    public int getRam() {
+        return ram;
+    }
+
+    public void setRam(int ram) {
+        this.ram = ram;
     }
 
     public double getPrice() {
@@ -64,20 +62,8 @@ public class Computer {
     public void setPrice(double price) {
         this.price = price;
     }
-
-    public boolean isInStock() {
-        return inStock;
+    public void displayInfo() {
+        System.out.print("ID: " + id + " | Brand: " + brand + 
+                         " | CPU: " + cpu + " | RAM: " + ram + "GB | Price: " + price + " VND");
     }
-
-    public void setInStock(boolean inStock) {
-        this.inStock = inStock;
-    }
-
-    @Override
-    public String toString() {
-        return "Computer{" + "id=" + id + ", name=" + name + ", brand=" + brand + ", specs=" + specs + ", price=" + price + ", inStock=" + inStock + '}';
-    }
-    
-    
-
 }
