@@ -63,7 +63,8 @@ public class Computer {
         this.price = price;
     }
     public void displayInfo() {
-        System.out.print("ID: " + id + " | Brand: " + brand + 
-                         " | CPU: " + cpu + " | RAM: " + ram + "GB | Price: " + price + " VND");
+    System.out.print("ID: " + id + " | Brand: " + brand + 
+                     " | CPU: " + cpu + " | RAM: " + ram + 
+                     "GB | Price: " + String.format("%,.0f", price) + " VND");
     }
 }
