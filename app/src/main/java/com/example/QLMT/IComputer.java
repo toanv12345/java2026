@@ -4,7 +4,7 @@ import java.util.List;
 
 public interface IComputer {
 
-    void addComputer(Computer computer) throws DuplicateIdException, Exception;
+    void addComputer(Computer computer) throws DuplicateIdException;
 
     List<Computer> getAllComputers();
 
@@ -12,5 +12,5 @@ public interface IComputer {
 
     boolean deleteById(String id) throws Exception;
 
-    boolean isIdExist(String id) throws Exception;
+    boolean isIdExist(String id);
 }

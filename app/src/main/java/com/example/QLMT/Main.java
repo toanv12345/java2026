@@ -1,37 +1,28 @@
 package com.example.QLMT;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-    private static Scanner scanner = new Scanner(System.in);
-    private static ComputerManager manager = new ComputerManager();
+    private static final Scanner scanner = new Scanner(System.in);
+        
+    private static final ComputerManager manager = new ComputerManager();
 
     public static void main(String[] args) {
-        int choice = -1;
+        int choice;
         do {
             showMenu();
             choice = inputInt("Lựa chọn của bạn: ");
             switch (choice) {
-                case 1:
-                    addLaptopMenu();
-                    break;
-                case 2:
-                    addDesktopMenu();
-                    break;
-                case 3:
-                    manager.displayAll();
-                    break;
-                case 4:
-                    searchComputer();
-                    break;
-                case 5:
-                    deleteComputer();
-                    break;
-                case 0:
-                    System.out.println("Đã thoát chương trình. Tạm biệt!");
-                    break;
-                default:
-                    System.out.println("Lựa chọn không hợp lệ, vui lòng chọn từ 0 - 5.");
+                case 1: addLaptopMenu(); break;
+                case 2: addDesktopMenu(); break;
+                case 3: displayAllComputers(); break;
+                case 4: searchComputer(); break;
+                case 5: deleteComputer(); break;
+                case 6: exportFileMenu(); break;
+                case 7: importFileMenu(); break;
+                case 0: System.out.println("Đã thoát chương trình. Tạm biệt!"); break;
+                default: System.out.println("Lựa chọn không hợp lệ, vui lòng chọn từ 0 - 7.");
             }
         } while (choice != 0);
     }
@@ -43,11 +34,12 @@ public class Main {
         System.out.println("3. Hiển thị danh sách máy tính");
         System.out.println("4. Tìm kiếm máy tính theo ID");
         System.out.println("5. Xóa máy tính theo ID");
+        System.out.println("6. Xuất danh sách máy tính ra File (.txt / .csv)");
+        System.out.println("7. Nhập thông tin máy tính từ File (.txt / .csv)");
         System.out.println("0. Thoát");
         System.out.println("==================================================");
     }
 
-    // Menu thêm Laptop
     private static void addLaptopMenu() {
         System.out.println("\n--- NHẬP THÔNG TIN LAPTOP ---");
         String id = inputString("Nhập ID: ");
@@ -85,6 +77,18 @@ public class Main {
         }
     }
 
+    private static void displayAllComputers() {
+        List<Computer> list = manager.getAllComputers();
+        if (list.isEmpty()) {
+            System.out.println("Danh sách hiện đang trống!");
+            return;
+        }
+        System.out.println("\n========== DANH SÁCH MÁY TÍNH ==========");
+        for (Computer c : list) {
+            c.displayInfo();
+        }
+    }
+
     private static void searchComputer() {
         String id = inputString("Nhập ID cần tìm: ");
         try {
@@ -106,14 +110,29 @@ public class Main {
         }
     }
 
+    private static void exportFileMenu() {
+        String filePath = inputString("Nhập tên file/đường dẫn cần xuất (VD: computers.csv): ");
+        try {
+            manager.exportToFile(filePath);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    private static void importFileMenu() {
+        String filePath = inputString("Nhập tên file/đường dẫn cần đọc (VD: data_import.csv): ");
+        try {
+            manager.importFromFile(filePath);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
     private static String inputString(String label) {
-        String value = "";
         while (true) {
             System.out.print(label);
-            value = scanner.nextLine().trim();
-            if (!value.isEmpty()) {
-                return value;
-            }
+            String value = scanner.nextLine().trim();
+            if (!value.isEmpty()) return value;
             System.out.println("Lỗi: Không được để trống!");
         }
     }
@@ -122,8 +141,7 @@ public class Main {
         while (true) {
             try {
                 System.out.print(label);
-                int val = Integer.parseInt(scanner.nextLine().trim());
-                return val;
+                return Integer.parseInt(scanner.nextLine().trim());
             } catch (NumberFormatException e) {
                 System.out.println("Lỗi: Vui lòng nhập số nguyên hợp lệ!");
             }
@@ -142,10 +160,9 @@ public class Main {
         while (true) {
             try {
                 System.out.print(label);
-                double val = Double.parseDouble(scanner.nextLine().trim());
-                return val;
+                return Double.parseDouble(scanner.nextLine().trim());
             } catch (NumberFormatException e) {
-                System.out.println("Lỗi: Vui lòng nhập số hợp lệ!");
+                System.out.println("Lỗi: Vui lòng nhập số thực hợp lệ!");
             }
         }
     }
