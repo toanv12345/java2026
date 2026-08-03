@@ -4,5 +4,5 @@ public interface IManagement {
 
     void exportToFile(String filePath) throws Exception;
 
-    int importFromFile(String filePath) throws Exception;
+    void importFromFile(String filePath) throws Exception;
 }

@@ -3,7 +3,9 @@ package com.example.QLMT;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
@@ -66,84 +68,110 @@ public class ComputerManager implements IComputer, IManagement {
         }
 
         try (FileOutputStream fos = new FileOutputStream(filePath);
-             OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
-             BufferedWriter bw = new BufferedWriter(osw)) {
+            OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
+            BufferedWriter bw = new BufferedWriter(osw)) {
 
             for (Computer c : list) {
                 if (c instanceof Laptop) {
                     Laptop l = (Laptop) c;
-                    bw.write(String.format("LAPTOP,%s,%s,%s,%d,%.0f,%.2f,%d,%.1f",
-                            l.getId(), l.getBrand(), l.getCpu(), l.getRam(), l.getPrice(),
-                            l.getWeight(), l.getBatteryCapacity(), l.getScreenSize()));
+                    String line = String.format(
+                        "LAPTOP  | ID: %s | Brand: %s | CPU: %s | RAM: %dGB | Price: %.0f VND | Weight: %.1fkg | Battery: %dmAh | Screen: %.1f inch",
+                        l.getId(), l.getBrand(), l.getCpu(), l.getRam(), l.getPrice(),
+                        l.getWeight(), l.getBatteryCapacity(), l.getScreenSize()
+                    );
+                    bw.write(line);
+
                 } else if (c instanceof Desktop) {
                     Desktop d = (Desktop) c;
-                    bw.write(String.format("DESKTOP,%s,%s,%s,%d,%.0f,%d,%s",
-                            d.getId(), d.getBrand(), d.getCpu(), d.getRam(), d.getPrice(),
-                            d.getPowerSupply(), d.getCaseType()));
+                    String line = String.format(
+                        "DESKTOP | ID: %s | Brand: %s | CPU: %s | RAM: %dGB | Price: %.0f VND | Power: %dW | Case: %s",
+                        d.getId(), d.getBrand(), d.getCpu(), d.getRam(), d.getPrice(),
+                        d.getPowerSupply(), d.getCaseType()
+                    );
+                    bw.write(line);
                 }
                 bw.newLine();
             }
-            System.out.println("-> Xuất file thành công: " + filePath);
+            System.out.println("-> Xuất file dạng văn bản thành công: " + filePath);
         } catch (Exception e) {
             throw new Exception("Lỗi khi ghi file: " + e.getMessage());
         }
     }
 
     @Override
-    public int importFromFile(String filePath) throws Exception {
+    public void importFromFile(String filePath) throws Exception {
         int importedCount = 0;
-        int errorCount = 0;
+        int skippedCount = 0;
 
         try (FileInputStream fis = new FileInputStream(filePath);
-             InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
-             BufferedReader br = new BufferedReader(isr)) {
+            InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
+            BufferedReader br = new BufferedReader(isr)) {
 
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
                 if (line.isEmpty()) continue;
 
-                String[] parts = line.split(",");
-                if (parts.length < 8) continue;
-
-                String type = parts[0].trim().toUpperCase();
-                String id = parts[1].trim();
-                String brand = parts[2].trim();
-                String cpu = parts[3].trim();
-                int ram = Integer.parseInt(parts[4].trim());
-                double price = Double.parseDouble(parts[5].trim());
-
                 try {
-                    if ("LAPTOP".equalsIgnoreCase(type) && parts.length >= 9) {
-                        double weight = Double.parseDouble(parts[6].trim());
-                        int battery = Integer.parseInt(parts[7].trim());
-                        double screenSize = Double.parseDouble(parts[8].trim());
+                    String[] parts = line.split("\\|");
+                    String type = parts[0].trim().toUpperCase();
+
+                    if ("LAPTOP".equals(type) && parts.length >= 9) {
+                        String id = getValue(parts[1], "ID:");
+                        String brand = getValue(parts[2], "Brand:");
+                        String cpu = getValue(parts[3], "CPU:");
+                        int ram = Integer.parseInt(getValue(parts[4], "RAM:").replace("GB", ""));
+                        double price = Double.parseDouble(getValue(parts[5], "Price:").replace("VND", ""));
+                        double weight = Double.parseDouble(getValue(parts[6], "Weight:").replace("kg", ""));
+                        int battery = Integer.parseInt(getValue(parts[7], "Battery:").replace("mAh", ""));
+                        double screenSize = Double.parseDouble(getValue(parts[8], "Screen:").replace("inch", ""));
 
                         Laptop laptop = new Laptop(id, brand, cpu, ram, price, weight, battery, screenSize);
-                        addComputer(laptop);
-                        importedCount++;
+                    
+                        if (!isIdExist(id)) {
+                            list.add(laptop);
+                            importedCount++;
+                        } else {
+                            skippedCount++;
+                        }
 
-                    } else if ("DESKTOP".equalsIgnoreCase(type) && parts.length >= 8) {
-                        int powerSupply = Integer.parseInt(parts[6].trim());
-                        String caseType = parts[7].trim();
+                    } else if ("DESKTOP".equals(type) && parts.length >= 7) {
+                        String id = getValue(parts[1], "ID:");
+                        String brand = getValue(parts[2], "Brand:");
+                        String cpu = getValue(parts[3], "CPU:");
+                        int ram = Integer.parseInt(getValue(parts[4], "RAM:").replace("GB", ""));
+                        double price = Double.parseDouble(getValue(parts[5], "Price:").replace("VND", ""));
+                        int powerSupply = Integer.parseInt(getValue(parts[6], "Power:").replace("W", ""));
+                        String caseType = getValue(parts[7], "Case:");
 
                         Desktop desktop = new Desktop(id, brand, cpu, ram, price, powerSupply, caseType);
-                        addComputer(desktop);
-                        importedCount++;
+
+                        if (!isIdExist(id)) {
+                            list.add(desktop);
+                            importedCount++;
+                        } else {
+                            skippedCount++;
+                        }
                     }
-                } catch (DuplicateIdException e) {
-                    System.err.println("Bỏ qua ID trùng trong file: " + id);
-                    errorCount++;
                 } catch (Exception e) {
-                    System.err.println("Bỏ qua dòng lỗi định dạng: " + line);
-                    errorCount++;
+                    skippedCount++;
                 }
             }
-        } catch (Exception e) {
-            throw new Exception("Lỗi đọc file: " + e.getMessage());
-        }
 
-        System.out.println("-> Hoàn tất nhập file! Thành công: " + importedCount + " | Bỏ qua/Lỗi: " + errorCount);
-        return importedCount;
+            System.out.println("-> Nhập dữ liệu hoàn tất! Thành công: " + importedCount + " máy | Bỏ qua/Lỗi: " + skippedCount);
+
+        } catch (FileNotFoundException e) {
+            throw new Exception("Không tìm thấy file: " + filePath);
+        } catch (IOException e) {
+            throw new Exception("Lỗi khi đọc file: " + e.getMessage());
+        }
+    }
+    
+    private String getValue(String field, String prefix) {
+        String trimmed = field.trim();
+        if (trimmed.startsWith(prefix)) {
+            return trimmed.substring(prefix.length()).trim();
+        }
+        return trimmed;
     }
 }
