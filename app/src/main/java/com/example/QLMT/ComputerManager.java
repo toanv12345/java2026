@@ -220,7 +220,7 @@ public class ComputerManager implements IManagement {
             }
 
             System.out.println(
-                    "-> Nhập file nhị phân hoàn tất! Thành công: " + importedCount
+                    "-> Nhập dữ liệu hoàn tất! Thành công: " + importedCount
                             + " máy | Bỏ qua (trùng ID): " + skippedCount);
 
         } catch (FileNotFoundException e) {
