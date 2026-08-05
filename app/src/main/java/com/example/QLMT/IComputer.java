@@ -1,16 +1,26 @@
 package com.example.QLMT;
 
-import java.util.List;
-
 public interface IComputer {
 
-    void addComputer(Computer computer) throws DuplicateIdException;
+    String getId();
 
-    List<Computer> getAllComputers();
+    void setId(String id);
 
-    Computer findById(String id) throws Exception;
+    String getBrand();
 
-    boolean deleteById(String id) throws Exception;
+    void setBrand(String brand);
 
-    boolean isIdExist(String id);
+    String getCpu();
+
+    void setCpu(String cpu);
+
+    int getRam();
+
+    void setRam(int ram);
+
+    double getPrice();
+
+    void setPrice(double price);
+
+    void displayInfo();
 }

@@ -1,19 +1,14 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.example.QLMT;
 
-/**
- *
- * @author oocs
- */
 public class Laptop extends Computer {
-    private double weight;      
-    private int batteryCapacity; 
-    private double screenSize;   
 
-    public Laptop(String id, String brand, String cpu, int ram, double price, double weight, int batteryCapacity, double screenSize) {
+    private static final long serialVersionUID = 2L;
+    private double weight;
+    private int batteryCapacity;
+    private double screenSize;
+
+    public Laptop(String id, String brand, String cpu, int ram, double price, double weight, int batteryCapacity,
+            double screenSize) {
         super(id, brand, cpu, ram, price);
         this.weight = weight;
         this.batteryCapacity = batteryCapacity;
@@ -43,9 +38,10 @@ public class Laptop extends Computer {
     public void setScreenSize(double screenSize) {
         this.screenSize = screenSize;
     }
-    
+
     @Override
     public void displayInfo() {
+        System.out.print("LAPTOP  | ");
         super.displayInfo();
         System.out.println(" | Weight: " + weight + "kg | Battery: " + batteryCapacity + "mAh | Screen: " + screenSize + " inch");
     }

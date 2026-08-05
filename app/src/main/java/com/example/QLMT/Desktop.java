@@ -1,18 +1,12 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.example.QLMT;
 
-/**
- *
- * @author oocs
- */
 public class Desktop extends Computer {
+
+    private static final long serialVersionUID = 3L;
     private int powerSupply;
     private String caseType;
-    
-    public Desktop (String id, String brand, String cpu, int ram, double price, int powerSupply, String caseType){
+
+    public Desktop(String id, String brand, String cpu, int ram, double price, int powerSupply, String caseType) {
         super(id, brand, cpu, ram, price);
         this.powerSupply = powerSupply;
         this.caseType = caseType;
@@ -33,9 +27,10 @@ public class Desktop extends Computer {
     public void setCaseType(String caseType) {
         this.caseType = caseType;
     }
-    
+
     @Override
     public void displayInfo() {
+        System.out.print("DESKTOP | ");
         super.displayInfo();
         System.out.println(" | Power: " + powerSupply + "W | Case: " + caseType);
     }

@@ -7,14 +7,16 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ComputerManager implements IComputer, IManagement {
+public class ComputerManager implements IManagement {
 
-    private final List<Computer> list;
+    private List<Computer> list;
 
     public ComputerManager() {
         this.list = new ArrayList<>();
@@ -61,56 +63,74 @@ public class ComputerManager implements IComputer, IManagement {
         return true;
     }
 
+    private boolean isBinaryFile(String filePath) {
+        return filePath.toLowerCase().endsWith(".bin");
+    }
+
     @Override
     public void exportToFile(String filePath) throws Exception {
         if (list.isEmpty()) {
             throw new Exception("Danh sách rỗng, không có dữ liệu để xuất file!");
         }
-
-        try (FileOutputStream fos = new FileOutputStream(filePath);
-            OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
-            BufferedWriter bw = new BufferedWriter(osw)) {
-
-            for (Computer c : list) {
-                if (c instanceof Laptop) {
-                    Laptop l = (Laptop) c;
-                    String line = String.format(
-                        "LAPTOP  | ID: %s | Brand: %s | CPU: %s | RAM: %dGB | Price: %.0f VND | Weight: %.1fkg | Battery: %dmAh | Screen: %.1f inch",
-                        l.getId(), l.getBrand(), l.getCpu(), l.getRam(), l.getPrice(),
-                        l.getWeight(), l.getBatteryCapacity(), l.getScreenSize()
-                    );
-                    bw.write(line);
-
-                } else if (c instanceof Desktop) {
-                    Desktop d = (Desktop) c;
-                    String line = String.format(
-                        "DESKTOP | ID: %s | Brand: %s | CPU: %s | RAM: %dGB | Price: %.0f VND | Power: %dW | Case: %s",
-                        d.getId(), d.getBrand(), d.getCpu(), d.getRam(), d.getPrice(),
-                        d.getPowerSupply(), d.getCaseType()
-                    );
-                    bw.write(line);
-                }
-                bw.newLine();
-            }
-            System.out.println("-> Xuất file dạng văn bản thành công: " + filePath);
-        } catch (Exception e) {
-            throw new Exception("Lỗi khi ghi file: " + e.getMessage());
+        if (isBinaryFile(filePath)) {
+            exportToBinaryFile(filePath);
+        } else {
+            exportToTextFile(filePath);
         }
     }
 
     @Override
     public void importFromFile(String filePath) throws Exception {
+        if (isBinaryFile(filePath)) {
+            importFromBinaryFile(filePath);
+        } else {
+            importFromTextFile(filePath);
+        }
+    }
+
+    private void exportToTextFile(String filePath) throws Exception {
+        try (FileOutputStream fos = new FileOutputStream(filePath);
+                OutputStreamWriter osw = new OutputStreamWriter(fos, StandardCharsets.UTF_8);
+                BufferedWriter bw = new BufferedWriter(osw)) {
+
+            for (Computer c : list) {
+                if (c instanceof Laptop) {
+                    Laptop l = (Laptop) c;
+                    String line = String.format(
+                            "LAPTOP  | ID: %s | Brand: %s | CPU: %s | RAM: %dGB | Price: %.0f VND | Weight: %.1fkg | Battery: %dmAh | Screen: %.1f inch",
+                            l.getId(), l.getBrand(), l.getCpu(), l.getRam(), l.getPrice(),
+                            l.getWeight(), l.getBatteryCapacity(), l.getScreenSize());
+                    bw.write(line);
+
+                } else if (c instanceof Desktop) {
+                    Desktop d = (Desktop) c;
+                    String line = String.format(
+                            "DESKTOP | ID: %s | Brand: %s | CPU: %s | RAM: %dGB | Price: %.0f VND | Power: %dW | Case: %s",
+                            d.getId(), d.getBrand(), d.getCpu(), d.getRam(), d.getPrice(),
+                            d.getPowerSupply(), d.getCaseType());
+                    bw.write(line);
+                }
+                bw.newLine();
+            }
+            System.out.println("-> Xuất file văn bản thành công: " + filePath);
+        } catch (Exception e) {
+            throw new Exception("Lỗi khi ghi file văn bản: " + e.getMessage());
+        }
+    }
+
+    private void importFromTextFile(String filePath) throws Exception {
         int importedCount = 0;
         int skippedCount = 0;
 
         try (FileInputStream fis = new FileInputStream(filePath);
-            InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
-            BufferedReader br = new BufferedReader(isr)) {
+                InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
+                BufferedReader br = new BufferedReader(isr)) {
 
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if (line.isEmpty()) continue;
+                if (line.isEmpty())
+                    continue;
 
                 try {
                     String[] parts = line.split("\\|");
@@ -127,7 +147,7 @@ public class ComputerManager implements IComputer, IManagement {
                         double screenSize = Double.parseDouble(getValue(parts[8], "Screen:").replace("inch", ""));
 
                         Laptop laptop = new Laptop(id, brand, cpu, ram, price, weight, battery, screenSize);
-                    
+
                         if (!isIdExist(id)) {
                             list.add(laptop);
                             importedCount++;
@@ -158,15 +178,60 @@ public class ComputerManager implements IComputer, IManagement {
                 }
             }
 
-            System.out.println("-> Nhập dữ liệu hoàn tất! Thành công: " + importedCount + " máy | Bỏ qua/Lỗi: " + skippedCount);
+            System.out.println(
+                    "-> Nhập dữ liệu hoàn tất! Thành công: " + importedCount + " máy | Bỏ qua/Lỗi: " + skippedCount);
 
         } catch (FileNotFoundException e) {
             throw new Exception("Không tìm thấy file: " + filePath);
         } catch (IOException e) {
-            throw new Exception("Lỗi khi đọc file: " + e.getMessage());
+            throw new Exception("Lỗi khi đọc file văn bản: " + e.getMessage());
         }
     }
-    
+
+    private void exportToBinaryFile(String filePath) throws Exception {
+        try (FileOutputStream fos = new FileOutputStream(filePath);
+                ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+
+            oos.writeObject(list);
+            System.out.println("-> Xuất file nhị phân thành công: " + filePath
+                    + " (" + list.size() + " máy)");
+        } catch (Exception e) {
+            throw new Exception("Lỗi khi ghi file nhị phân: " + e.getMessage());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void importFromBinaryFile(String filePath) throws Exception {
+        int importedCount = 0;
+        int skippedCount = 0;
+
+        try (FileInputStream fis = new FileInputStream(filePath);
+                ObjectInputStream ois = new ObjectInputStream(fis)) {
+
+            List<Computer> imported = (List<Computer>) ois.readObject();
+
+            for (Computer c : imported) {
+                if (!isIdExist(c.getId())) {
+                    list.add(c);
+                    importedCount++;
+                } else {
+                    skippedCount++;
+                }
+            }
+
+            System.out.println(
+                    "-> Nhập file nhị phân hoàn tất! Thành công: " + importedCount
+                            + " máy | Bỏ qua (trùng ID): " + skippedCount);
+
+        } catch (FileNotFoundException e) {
+            throw new Exception("Không tìm thấy file: " + filePath);
+        } catch (ClassNotFoundException e) {
+            throw new Exception("Định dạng file nhị phân không hợp lệ: " + e.getMessage());
+        } catch (IOException e) {
+            throw new Exception("Lỗi khi đọc file nhị phân: " + e.getMessage());
+        }
+    }
+
     private String getValue(String field, String prefix) {
         String trimmed = field.trim();
         if (trimmed.startsWith(prefix)) {

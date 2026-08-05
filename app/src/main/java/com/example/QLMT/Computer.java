@@ -1,16 +1,11 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.example.QLMT;
 
-/**
- *
- * @author oocs
- */
-public class Computer {
-    private String id;               
-    private String brand;    
+import java.io.Serializable;
+
+public class Computer implements IComputer, Serializable {
+    private static final long serialVersionUID = 1L;
+    private String id;
+    private String brand;
     private String cpu;
     private int ram;
     private double price;
@@ -62,9 +57,10 @@ public class Computer {
     public void setPrice(double price) {
         this.price = price;
     }
+
     public void displayInfo() {
-    System.out.print("ID: " + id + " | Brand: " + brand + 
-                     " | CPU: " + cpu + " | RAM: " + ram + 
-                     "GB | Price: " + String.format("%,.0f", price) + " VND");
+        System.out.print("ID: " + id + " | Brand: " + brand +
+                " | CPU: " + cpu + " | RAM: " + ram +
+                "GB | Price: " + String.format("%,.0f", price) + " VND");
     }
 }

@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 public class Main {
     private static final Scanner scanner = new Scanner(System.in);
-        
+
     private static final ComputerManager manager = new ComputerManager();
 
     public static void main(String[] args) {
@@ -14,15 +14,32 @@ public class Main {
             showMenu();
             choice = inputInt("Lựa chọn của bạn: ");
             switch (choice) {
-                case 1: addLaptopMenu(); break;
-                case 2: addDesktopMenu(); break;
-                case 3: displayAllComputers(); break;
-                case 4: searchComputer(); break;
-                case 5: deleteComputer(); break;
-                case 6: exportFileMenu(); break;
-                case 7: importFileMenu(); break;
-                case 0: System.out.println("Đã thoát chương trình. Tạm biệt!"); break;
-                default: System.out.println("Lựa chọn không hợp lệ, vui lòng chọn từ 0 - 7.");
+                case 1:
+                    addLaptopMenu();
+                    break;
+                case 2:
+                    addDesktopMenu();
+                    break;
+                case 3:
+                    displayAllComputers();
+                    break;
+                case 4:
+                    searchComputer();
+                    break;
+                case 5:
+                    deleteComputer();
+                    break;
+                case 6:
+                    exportFileMenu();
+                    break;
+                case 7:
+                    importFileMenu();
+                    break;
+                case 0:
+                    System.out.println("Đã thoát chương trình. Tạm biệt!");
+                    break;
+                default:
+                    System.out.println("Lựa chọn không hợp lệ, vui lòng chọn từ 0 - 7.");
             }
         } while (choice != 0);
     }
@@ -34,8 +51,8 @@ public class Main {
         System.out.println("3. Hiển thị danh sách máy tính");
         System.out.println("4. Tìm kiếm máy tính theo ID");
         System.out.println("5. Xóa máy tính theo ID");
-        System.out.println("6. Xuất danh sách máy tính ra File (.txt / .csv)");
-        System.out.println("7. Nhập thông tin máy tính từ File (.txt / .csv)");
+        System.out.println("6. Xuất danh sách máy tính ra File (.txt / .csv / .bin)");
+        System.out.println("7. Nhập thông tin máy tính từ File (.txt / .csv / .bin)");
         System.out.println("0. Thoát");
         System.out.println("==================================================");
     }
@@ -132,7 +149,8 @@ public class Main {
         while (true) {
             System.out.print(label);
             String value = scanner.nextLine().trim();
-            if (!value.isEmpty()) return value;
+            if (!value.isEmpty())
+                return value;
             System.out.println("Lỗi: Không được để trống!");
         }
     }
@@ -151,7 +169,8 @@ public class Main {
     private static int inputPositiveInt(String label) {
         while (true) {
             int val = inputInt(label);
-            if (val > 0) return val;
+            if (val > 0)
+                return val;
             System.out.println("Lỗi: Giá trị phải lớn hơn 0!");
         }
     }
@@ -170,7 +189,8 @@ public class Main {
     private static double inputPositiveDouble(String label) {
         while (true) {
             double val = inputDouble(label);
-            if (val > 0) return val;
+            if (val > 0)
+                return val;
             System.out.println("Lỗi: Giá trị phải lớn hơn 0!");
         }
     }
