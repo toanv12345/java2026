@@ -12,6 +12,8 @@ public interface IManagement {
 
     boolean deleteById(String id) throws Exception;
 
+    boolean updateComputer(String id, Computer updated) throws Exception;
+
     boolean isIdExist(String id);
 
     void exportToFile(String filePath) throws Exception;

@@ -63,6 +63,51 @@ public class ComputerManager implements IManagement {
         return true;
     }
 
+    @Override
+    public boolean updateComputer(String id, Computer updated) throws Exception {
+        Computer existing = findById(id);
+
+        // Cập nhật các trường chung
+        if (updated.getBrand() != null && !updated.getBrand().isEmpty()) {
+            existing.setBrand(updated.getBrand());
+        }
+        if (updated.getCpu() != null && !updated.getCpu().isEmpty()) {
+            existing.setCpu(updated.getCpu());
+        }
+        if (updated.getRam() > 0) {
+            existing.setRam(updated.getRam());
+        }
+        if (updated.getPrice() > 0) {
+            existing.setPrice(updated.getPrice());
+        }
+
+        // Cập nhật các trường riêng theo kiểu máy
+        if (existing instanceof Laptop && updated instanceof Laptop) {
+            Laptop existingLaptop = (Laptop) existing;
+            Laptop updatedLaptop = (Laptop) updated;
+            if (updatedLaptop.getWeight() > 0) {
+                existingLaptop.setWeight(updatedLaptop.getWeight());
+            }
+            if (updatedLaptop.getBatteryCapacity() > 0) {
+                existingLaptop.setBatteryCapacity(updatedLaptop.getBatteryCapacity());
+            }
+            if (updatedLaptop.getScreenSize() > 0) {
+                existingLaptop.setScreenSize(updatedLaptop.getScreenSize());
+            }
+        } else if (existing instanceof Desktop && updated instanceof Desktop) {
+            Desktop existingDesktop = (Desktop) existing;
+            Desktop updatedDesktop = (Desktop) updated;
+            if (updatedDesktop.getPowerSupply() > 0) {
+                existingDesktop.setPowerSupply(updatedDesktop.getPowerSupply());
+            }
+            if (updatedDesktop.getCaseType() != null && !updatedDesktop.getCaseType().isEmpty()) {
+                existingDesktop.setCaseType(updatedDesktop.getCaseType());
+            }
+        }
+
+        return true;
+    }
+
     private boolean isBinaryFile(String filePath) {
         return filePath.toLowerCase().endsWith(".bin");
     }

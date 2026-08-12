@@ -30,16 +30,19 @@ public class Main {
                     deleteComputer();
                     break;
                 case 6:
-                    exportFileMenu();
+                    editComputerMenu();
                     break;
                 case 7:
+                    exportFileMenu();
+                    break;
+                case 8:
                     importFileMenu();
                     break;
                 case 0:
                     System.out.println("Đã thoát chương trình. Tạm biệt!");
                     break;
                 default:
-                    System.out.println("Lựa chọn không hợp lệ, vui lòng chọn từ 0 - 7.");
+                    System.out.println("Lựa chọn không hợp lệ, vui lòng chọn từ 0 - 8.");
             }
         } while (choice != 0);
     }
@@ -51,8 +54,9 @@ public class Main {
         System.out.println("3. Hiển thị danh sách máy tính");
         System.out.println("4. Tìm kiếm máy tính theo ID");
         System.out.println("5. Xóa máy tính theo ID");
-        System.out.println("6. Xuất danh sách máy tính ra File (.txt / .csv / .bin)");
-        System.out.println("7. Nhập thông tin máy tính từ File (.txt / .csv / .bin)");
+        System.out.println("6. Sửa thông tin máy tính theo ID");
+        System.out.println("7. Xuất danh sách máy tính ra File (.txt / .csv / .bin)");
+        System.out.println("8. Nhập thông tin máy tính từ File (.txt / .csv / .bin)");
         System.out.println("0. Thoát");
         System.out.println("==================================================");
     }
@@ -127,6 +131,71 @@ public class Main {
         }
     }
 
+    private static void editComputerMenu() {
+        System.out.println("\n--- SỬA THÔNG TIN MÁY TÍNH ---");
+        String id = inputString("Nhập ID máy tính cần sửa: ");
+        Computer existing;
+        try {
+            existing = manager.findById(id);
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return;
+        }
+
+        System.out.println("-> Thông tin hiện tại:");
+        existing.displayInfo();
+        System.out.println("\n(Nhấn Enter để giữ nguyên giá trị cũ)");
+
+        if (existing instanceof Laptop) {
+            Laptop old = (Laptop) existing;
+            String brand   = inputOptionalString("Thương hiệu [" + old.getBrand() + "]: ");
+            String cpu     = inputOptionalString("CPU [" + old.getCpu() + "]: ");
+            int    ram     = inputOptionalPositiveInt("RAM (GB) [" + old.getRam() + "]: ");
+            double price   = inputOptionalPositiveDouble("Giá (VND) [" + (long) old.getPrice() + "]: ");
+            double weight  = inputOptionalPositiveDouble("Trọng lượng (kg) [" + old.getWeight() + "]: ");
+            int    battery = inputOptionalPositiveInt("Pin (mAh) [" + old.getBatteryCapacity() + "]: ");
+            double screen  = inputOptionalPositiveDouble("Màn hình (inch) [" + old.getScreenSize() + "]: ");
+
+            Laptop updated = new Laptop(id,
+                    brand.isEmpty()  ? old.getBrand()  : brand,
+                    cpu.isEmpty()    ? old.getCpu()    : cpu,
+                    ram   == 0       ? old.getRam()    : ram,
+                    price == 0       ? old.getPrice()  : price,
+                    weight == 0      ? old.getWeight() : weight,
+                    battery == 0     ? old.getBatteryCapacity() : battery,
+                    screen == 0      ? old.getScreenSize()      : screen);
+            try {
+                manager.updateComputer(id, updated);
+                System.out.println("-> Cập nhật Laptop thành công!");
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+            }
+
+        } else if (existing instanceof Desktop) {
+            Desktop old   = (Desktop) existing;
+            String brand  = inputOptionalString("Thương hiệu [" + old.getBrand() + "]: ");
+            String cpu    = inputOptionalString("CPU [" + old.getCpu() + "]: ");
+            int    ram    = inputOptionalPositiveInt("RAM (GB) [" + old.getRam() + "]: ");
+            double price  = inputOptionalPositiveDouble("Giá (VND) [" + (long) old.getPrice() + "]: ");
+            int    power  = inputOptionalPositiveInt("Công suất nguồn (W) [" + old.getPowerSupply() + "]: ");
+            String caseT  = inputOptionalString("Loại Case [" + old.getCaseType() + "]: ");
+
+            Desktop updated = new Desktop(id,
+                    brand.isEmpty()  ? old.getBrand()      : brand,
+                    cpu.isEmpty()    ? old.getCpu()        : cpu,
+                    ram   == 0       ? old.getRam()        : ram,
+                    price == 0       ? old.getPrice()      : price,
+                    power == 0       ? old.getPowerSupply(): power,
+                    caseT.isEmpty()  ? old.getCaseType()   : caseT);
+            try {
+                manager.updateComputer(id, updated);
+                System.out.println("-> Cập nhật Desktop thành công!");
+            } catch (Exception e) {
+                System.err.println(e.getMessage());
+            }
+        }
+    }
+
     private static void exportFileMenu() {
         String filePath = inputString("Nhập tên file/đường dẫn cần xuất (VD: computers.csv): ");
         try {
@@ -152,6 +221,44 @@ public class Main {
             if (!value.isEmpty())
                 return value;
             System.out.println("Lỗi: Không được để trống!");
+        }
+    }
+
+    /** Trả về chuỗi rỗng nếu người dùng bấm Enter (giữ nguyên giá trị cũ). */
+    private static String inputOptionalString(String label) {
+        System.out.print(label);
+        return scanner.nextLine().trim();
+    }
+
+    /** Trả về 0 nếu người dùng bấm Enter (giữ nguyên giá trị cũ). */
+    private static int inputOptionalPositiveInt(String label) {
+        while (true) {
+            System.out.print(label);
+            String input = scanner.nextLine().trim();
+            if (input.isEmpty()) return 0;
+            try {
+                int val = Integer.parseInt(input);
+                if (val > 0) return val;
+                System.out.println("Lỗi: Giá trị phải lớn hơn 0!");
+            } catch (NumberFormatException e) {
+                System.out.println("Lỗi: Vui lòng nhập số nguyên hợp lệ!");
+            }
+        }
+    }
+
+    /** Trả về 0.0 nếu người dùng bấm Enter (giữ nguyên giá trị cũ). */
+    private static double inputOptionalPositiveDouble(String label) {
+        while (true) {
+            System.out.print(label);
+            String input = scanner.nextLine().trim();
+            if (input.isEmpty()) return 0.0;
+            try {
+                double val = Double.parseDouble(input);
+                if (val > 0) return val;
+                System.out.println("Lỗi: Giá trị phải lớn hơn 0!");
+            } catch (NumberFormatException e) {
+                System.out.println("Lỗi: Vui lòng nhập số thực hợp lệ!");
+            }
         }
     }
 
